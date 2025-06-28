@@ -26,7 +26,7 @@ if ($txn['status'] !== 'pending') {
 <h2>Pay for Transaction #<?= $txn['id'] ?></h2>
 <p>Amount: $<?= $txn['amount'] ?></p>
 
-<form method="post" action="">
+<form method="post" action="../payments/process.php">
     <input type="hidden" name="transaction_id" value="<?= $txn['id'] ?>">
     <label>Select Payment Gateway:</label><br>
     <select name="gateway" required>

@@ -11,7 +11,12 @@ class TransactionService
 
     public function updateTransactionStatus($id, $response, $gateway = null)
     {
-        $stmt = $this->pdo->prepare("UPDATE transactions SET status = ?, payment_gateway = ? WHERE id = ?");
-        return $stmt->execute([$response['status'], $gateway, $id]);
+        if ($gateway !== null) {
+            $stmt = $this->pdo->prepare("UPDATE transactions SET status = ?, payment_gateway = ? WHERE id = ?");
+            return $stmt->execute([$response['status'], $gateway, $id]);
+        } else {
+            $stmt = $this->pdo->prepare("UPDATE transactions SET status = ? WHERE id = ?");
+            return $stmt->execute([$response['status'], $id]);
+        }
     }
 }

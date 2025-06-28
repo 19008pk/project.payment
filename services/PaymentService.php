@@ -4,7 +4,23 @@ require_once __DIR__ . '/../gateways/GatewayInterface.php';
 
 class PaymentService
 {
-    public static function process($gateway, $transaction): array
+    public static function refund($transaction): array
+    {
+        try {
+            $gatewayInstance = self::resolveGatewayInstance($transaction['payment_gateway']);
+
+            return $gatewayInstance->refund($transaction);
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'status' => 'failed',
+                'reference_id' => null,
+                'message' => 'Unexpected error: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public static function pay($gateway, $transaction): array
     {
         try {
             $gatewayInstance = self::resolveGatewayInstance($gateway);

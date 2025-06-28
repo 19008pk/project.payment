@@ -20,6 +20,7 @@ $transactions = $stmt->fetchAll();
         <th>Gateway</th>
         <th>Edit</th>
         <th>Delete</th>
+        <th>Pay</th>
     </tr>
     <?php foreach ($transactions as $txn): ?>
         <tr>
@@ -33,6 +34,12 @@ $transactions = $stmt->fetchAll();
             <td>
                 <a href="delete.php?id=<?= $txn['id'] ?>" onclick="return confirm('Are you sure?')">Delete</a>
             </td>
+            <td>
+                <?php if ($txn['status'] === 'pending'): ?>
+                    <a href="pay.php?id=<?= $txn['id'] ?>">Pay</a>
+                <?php endif; ?>
+            </td>
+
         </tr>
     <?php endforeach; ?>
 </table>

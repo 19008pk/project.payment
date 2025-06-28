@@ -34,30 +34,26 @@ if ($action === 'refund') {
         echo "❌ Refund not allowed. Only paid transactions can be refunded.<br>";
     } else {
         $response = PaymentService::refund($txn);
-
         if ($response['success']) {
             echo "✅ Refund successful via <strong>" . $txn['payment_gateway'] . "</strong>!<br>";
-            $transactionService->updateTransactionStatus($txn['id'], $response);
         } else {
             echo "❌ Refund failed.<br>";
         }
     }
-} else { // action is 'pay' (default)
+} else {
     if ($txn['status'] !== 'pending') {
         echo "❌ Payment not allowed. Only pending transactions can be paid.<br>";
     } else {
         $response = PaymentService::pay($gateway, $txn);
 
         if ($response['success']) {
-            $transactionService = new TransactionService($pdo);
-            $transactionService->updateTransactionStatus($txn['id'], $response, $gateway);
             echo "✅ Payment successful via <strong>$gateway</strong>!<br>";
         } else {
             echo "❌ Payment failed via <strong>$gateway</strong>.<br>";
         }
     }
 }
-
+$transactionService->updateTransactionStatus($txn['id'], $response, $gateway);
 echo "Message: " . $response['message'] . "<br>";
 echo "Reference: " . $response['reference_id'] . "<br>";
 echo "Status: " . $response['status'] . "<br>";

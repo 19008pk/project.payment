@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $stmt = $pdo->prepare("UPDATE transactions SET amount = ?, status = ?, payment_gateway = ? WHERE id = ? AND user_id = ?");
-    $stmt->execute([$amount, $status, $gateway, $id, $_SESSION['user_id']]);
+    $stmt = $pdo->prepare("UPDATE transactions SET amount = ?, WHERE id = ? AND user_id = ?");
+    $stmt->execute([$amount, $id, $_SESSION['user_id']]);
 
     header('Location: list.php');
     exit;

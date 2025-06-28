@@ -1,12 +1,13 @@
 <?php
-$host = 'localhost';
-$db = 'payment';
-$user = 'root';
-$pass = '123456';
-$dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
+
+$config = require __DIR__ . '/../config/.env.php';
+
+$dsn = "mysql:host={$config['db_host']};dbname={$config['db_name']};charset=utf8mb4";
+
+require_once 'LoggedPDO.php';
 
 try {
-    $pdo = new PDO($dsn, $user, $pass);
+    $pdo = new LoggedPDO($dsn, $config['db_user'], $config['db_pass']);
 } catch (PDOException $e) {
     die("DB Connection failed: " . $e->getMessage());
 }

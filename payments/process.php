@@ -2,6 +2,8 @@
 require '../includes/auth.php';
 require_login();
 require '../includes/db.php';
+require '../services/PaymentService.php';
+require '../services/TransactionService.php';
 
 $transactionId = $_POST['transaction_id'] ?? null;
 $gateway = $_POST['gateway'] ?? null;
@@ -13,31 +15,36 @@ if (!$transactionId || !$gateway) {
     exit;
 }
 
-// Validate transaction
+// Fetch transaction
 $stmt = $pdo->prepare("SELECT * FROM transactions WHERE id = ? AND user_id = ?");
 $stmt->execute([$transactionId, $userId]);
 $txn = $stmt->fetch();
 
-if (!$txn) {
+if (!$txn || $txn['status'] !== 'pending') {
     echo "Transaction not found";
     echo "<br><a href='../transaction/list.php'>Back to Transactions</a>";
     exit;
 }
 
-// Step 2: Check status
-if ($txn['status'] == 'paid') {
-    echo "Only pending transactions can be paid. This transaction is <strong>{$txn['status']}</strong>.";
-    echo "<br><a href='../transaction/list.php'>Back to Transactions</a>";
-    exit;
+// 1. Process payment using PaymentService
+$paymentResult = PaymentService::process($gateway, $txn);
+
+// 2. Handle response using TransactionService
+$transactionService = new TransactionService($pdo);
+
+// 3. Show result
+if ($paymentResult['success']) {
+
+    echo "✅ Payment successful using <strong>$gateway</strong>!<br>";
+    echo "Transaction Ref: " . $paymentResult['reference_id'] . "<br>";
+    echo "Message: " . $paymentResult['message'] . "<br>";
+    echo "Status Ref: " . $paymentResult['status'] . "<br>";
+    $transactionService->updateTransactionStatus($txn['id'], $paymentResult, $gateway);
+} else {
+    echo "❌ Payment failed using <strong>$gateway</strong>.<br>";
+    echo "Transaction Ref: " . $paymentResult['reference_id'] . "<br>";
+    echo "Message: " . $paymentResult['message'] . "<br>";
+    echo "Status Ref: " . $paymentResult['status'] . "<br>";
 }
 
-// Call payment service
-
-// Simulate payment success
-$status = 'paid'; // simulate success
-
-$update = $pdo->prepare("UPDATE transactions SET status = ?, payment_gateway = ? WHERE id = ?");
-$update->execute([$status, $gateway, $transactionId]);
-
-echo "Payment successful using <strong>$gateway</strong>!<br>";
 echo "<a href='../transaction/list.php'>Back to Transactions</a>";

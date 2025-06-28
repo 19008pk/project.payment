@@ -3,6 +3,8 @@ require '../includes/auth.php';
 require_login();
 require '../includes/db.php';
 
+$gateways = require '../config/gateways.php';
+
 $id = $_GET['id'] ?? null;
 $userId = $_SESSION['user_id'];
 
@@ -31,9 +33,9 @@ if ($txn['status'] !== 'pending') {
     <label>Select Payment Gateway:</label><br>
     <select name="gateway" required>
         <option value="">--Select--</option>
-        <option value="paypal">PayPal</option>
-        <option value="stripe">Stripe</option>
-        <option value="razorpay">Razorpay</option>
+        <?php foreach ($gateways as $key => $label): ?>
+            <option value="<?= $key ?>"><?= htmlspecialchars($label) ?></option>
+        <?php endforeach; ?>
     </select><br><br>
     <button type="submit">Proceed to Pay</button>
 </form>
